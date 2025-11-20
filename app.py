@@ -1,7 +1,36 @@
+import os
 from flask import Flask, render_template
+from flask_sqlalchemy import SQLAlchemy
+from dotenv import load_dotenv
 from datetime import datetime
 
+# Load environment variables from .env file
+load_dotenv()
+
 app = Flask(__name__)
+
+# Configure the database using the variable from .env
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False # Recommended setting
+
+db = SQLAlchemy(app)
+
+# ... Your database models (classes) go here ...
+# Model for the Cat data
+class Cat(db.Model):
+    # Primary Key
+    id = db.Column(db.Integer, primary_key=True) 
+    
+    # Cat Information
+    name = db.Column(db.String(80), nullable=False)
+    age = db.Column(db.String(50), nullable=False)
+    story = db.Column(db.Text, nullable=False)
+    status = db.Column(db.String(50), nullable=False)
+    image = db.Column(db.String(255), nullable=True) # URL to the image
+
+    # Optional: A helpful representation when debugging
+    def __repr__(self):
+        return f'<Cat {self.name} - {self.status}>'
 
 # This route maps the root URL "/" to this function
 @app.route("/")
