@@ -29,8 +29,7 @@ def hello_there(name=None):
             "age": "12 Years (Senior)",
             "story": "Oscar is a wise soul who just wants a warm lap to sleep on. He purrs louder than a diesel engine and gives the best head-butts of affection.",
             "status": "Urgent Adoption",
-            "image": "https://images.unsplash.com/photo-1574158622682-e40e69881006?q=80&w=1160&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-        }
+            "image": "https://images.unsplash.com/photo-1574158622682-e40e69881006?auto=format&fit=crop&w=400&q=80"}
     ]
 
     return render_template(
