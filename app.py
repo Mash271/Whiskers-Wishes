@@ -24,7 +24,7 @@ db_conn = DatabaseConnection().get_connection()
 
 
 # This route maps the root URL "/" to this function
-@app.route("")
+@app.route("/")
 def home():
     # --- DATA CREATION (BUILDER PATTERN) ---
     # Using the Builder Pattern to create complex Cat objects
