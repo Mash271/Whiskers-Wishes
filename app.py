@@ -28,8 +28,7 @@ db_conn = DatabaseConnection().get_connection()
 def home():
     # --- DATA CREATION (BUILDER PATTERN) ---
     # Using the Builder Pattern to create complex Cat objects
-    # replacing the manual dictionary creation you had before.
-    
+        
     cat1 = (CatBuilder()
             .set_name("Mochi")
             .set_age("3 Months (Kitten)")
@@ -58,9 +57,9 @@ def home():
     # (assuming your HTML uses cat.name, cat.story, etc.)
     featured_cats = [cat1.to_dict(), cat2.to_dict(), cat3.to_dict()]
 
-    return render_template("hello_there.html", 
-                         featured_cats=featured_cats,
-                         today=datetime.today().strftime("%A, %B %d, %Y"))
+    return render_template("index.html") 
+                         #,featured_cats=featured_cats,
+                         #today=datetime.today().strftime("%A, %B %d, %Y"))
 
 @app.route("/hello/")
 @app.route("/hello/<name>")
@@ -89,7 +88,7 @@ def login_test():
 @app.route("/gallery")
 def gallery():
     # ... logic ...
-    return render_template("gallery.html", )
+    return render_template("gallery.html")
 
 # 3. About Link -> href="{{ url_for('about') }}"
 @app.route("/about")

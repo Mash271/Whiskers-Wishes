@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Whiskers & Wishes | Find Your Purrfect Match</title>
+    <style>
+        /* --- CSS STYLES --- */
+        :root {
+            --primary: #FF8C42;    /* Warm Orange */
+            --secondary: #4B3F72;  /* Deep Purple */
+            --light: #FFF5EB;      /* Cream Background */
+            --text: #2D2D2D;
+            --white: #ffffff;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--light);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        /* Navbar */
+        nav {
+            background-color: var(--white);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--secondary);
+        }
+
+        .nav-links a {
+            margin-left: 20px;
+            text-decoration: none;
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        .nav-links a.btn-login {
+            background-color: var(--primary);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 80px 20px;
+            background: linear-gradient(rgba(75, 63, 114, 0.8), rgba(75, 63, 114, 0.8)), url('https://images.unsplash.com/photo-1513360371669-4adf3dd7dff8?auto=format&fit=crop&w=1500&q=80');
+            background-size: cover;
+            background-position: center;
+            color: white;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin: 0 auto 30px auto;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background-color: var(--primary);
+            color: white;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: transform 0.2s;
+        }
+
+        .cta-button:hover {
+            transform: scale(1.05);
+        }
+
+        /* Featured Cats Section */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 60px 20px;
+        }
+
+        .section-title {
+            text-align: center;
+            color: var(--secondary);
+            margin-bottom: 40px;
+        }
+
+        .cats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .cat-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: transform 0.3s;
+        }
+
+        .cat-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .cat-img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+        }
+
+        .cat-info {
+            padding: 25px;
+        }
+
+        .cat-name {
+            font-size: 1.5rem;
+            color: var(--secondary);
+            margin: 0 0 5px 0;
+        }
+
+        .cat-age {
+            color: var(--primary);
+            font-weight: bold;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .cat-story {
+            color: #666;
+            font-size: 0.95rem;
+            margin-bottom: 20px;
+        }
+
+        .adopt-btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            text-align: center;
+            border: 2px solid var(--secondary);
+            color: var(--secondary);
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+
+        .adopt-btn:hover {
+            background-color: var(--secondary);
+            color: white;
+        }
+
+        footer {
+            background-color: var(--secondary);
+            color: white;
+            text-align: center;
+            padding: 20px;
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation -->
+<nav>
+    <div class="logo">Whiskers & Wishes</div>
+    <ul>
+        <!-- Link to the 'home' function in app.py -->
+        <li><a href="{{ url_for('home') }}">Home</a></li>
+        
+        <!-- Link to the 'gallery' function in app.py -->
+        <li><a href="{{ url_for('gallery') }}">Adopt/Gallery</a></li>
+        
+        <!-- Link to the 'about' function in app.py -->
+        <li><a href="{{ url_for('about') }}">About Us</a></li>
+        
+        <!-- Link to the 'login' function in app.py -->
+        <li><a href="{{ url_for('login') }}">Login</a></li>
+        
+        <!-- Link to the 'register' function in app.py -->
+        <li><a href="{{ url_for('register') }}" class="btn-signup">Sign Up</a></li>
+    </ul>
+</nav>
+
+    <!-- Hero Section -->
+    <div class="hero">
+        <h1>Find Your New Best Friend</h1>
+        <p>Every whisker tells a story, and every wish deserves a home. Join us in connecting loving families with cats in need.</p>
+        <a href="#" class="cta-button">Browse Available Cats</a>
+        <br><br>
+        <small>Current Server Time: {{ date.strftime('%Y-%m-%d %H:%M') }}</small>
+    </div>
+
+    <!-- Featured Cats (FR 2.1.1.1) -->
+    <div class="container">
+        <h2 class="section-title">Meet Our Featured Friends</h2>
+        
+        <div class="cats-grid">
+            <!-- This loop generates cards for every cat sent from Python -->
+            {% for cat in cats %}
+            <div class="cat-card">
+                <img src="{{ cat.image }}" alt="{{ cat.name }}" class="cat-img">
+                <div class="cat-info">
+                    <h3 class="cat-name">{{ cat.name }}</h3>
+                    <span class="cat-age">{{ cat.age }}</span>
+                    <p class="cat-story">{{ cat.story }}</p>
+                    <a href="#" class="adopt-btn">Meet {{ cat.name }}</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Whiskers & Wishes. A North South University Project.</p>
+    </footer>
+
+</body>
+</html>
