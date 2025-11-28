@@ -84,5 +84,33 @@ def login_test():
     mock_session["user_role"] = "Admin"
     return "You are now logged in as Admin. Try visiting <a href='/admin'>/admin</a>"
 
+# 1. Home Link -> href="{{ url_for('home') }}"
+@app.route("/")
+def home():
+    # ... logic ...
+    return render_template("landing_page.html", ...)
+
+# 2. Gallery Link -> href="{{ url_for('gallery') }}"
+@app.route("/gallery")
+def gallery():
+    # ... logic ...
+    return render_template("gallery.html", ...)
+
+# 3. About Link -> href="{{ url_for('about') }}"
+@app.route("/about")
+def about():
+    return render_template("about.html")
+
+# 4. Login Link -> href="{{ url_for('login') }}"
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    # ... logic ...
+    return render_template("login.html")
+
+# 5. Register Link -> href="{{ url_for('register') }}"
+@app.route("/register")
+def register():
+    return render_template("register.html")
+
 if __name__ == "__main__":
     app.run(debug=True)

@@ -181,16 +181,25 @@
 
     <!-- Navigation -->
     <nav>
-        <div class="logo">🐱 Whiskers & Wishes</div>
-        <div class="nav-links">
-            <a href="#">Home</a>
-            <a href="#">Gallery</a>
-            {% if name %}
-                <a href="#" class="btn-login">Welcome, {{ name }}!</a>
-            {% else %}
-                <a href="#" class="btn-login">Login / Sign Up</a>
-            {% endif %}
-        </div>
+        <nav>
+    <div class="logo">Whiskers & Wishes</div>
+    <ul>
+        <!-- Link to the 'home' function in app.py -->
+        <li><a href="{{ url_for('home') }}">Home</a></li>
+        
+        <!-- Link to the 'gallery' function in app.py -->
+        <li><a href="{{ url_for('gallery') }}">Adopt/Gallery</a></li>
+        
+        <!-- Link to the 'about' function in app.py -->
+        <li><a href="{{ url_for('about') }}">About Us</a></li>
+        
+        <!-- Link to the 'login' function in app.py -->
+        <li><a href="{{ url_for('login') }}">Login</a></li>
+        
+        <!-- Link to the 'register' function in app.py -->
+        <li><a href="{{ url_for('register') }}" class="btn-signup">Sign Up</a></li>
+    </ul>
+</nav>
     </nav>
 
     <!-- Hero Section -->
