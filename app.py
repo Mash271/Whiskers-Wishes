@@ -89,7 +89,7 @@ def login_test():
 @app.route("/gallery")
 def gallery():
     # ... logic ...
-    return render_template("gallery.html", ...)
+    return render_template("gallery.html", )
 
 # 3. About Link -> href="{{ url_for('about') }}"
 @app.route("/about")
