@@ -2,6 +2,7 @@ import sqlite3
 import os
 from abc import ABC, abstractmethod
 from functools import wraps
+from dotenv import load_dotenv
 
 # ==========================================
 # 1. SINGLETON PATTERN (Database Connection)
@@ -16,7 +17,7 @@ class DatabaseConnection:
             cls._instance = super(DatabaseConnection, cls).__new__(cls)
             
             # Check if we are on Render by looking for the DATABASE_URL variable
-            db_url = os.environ.get("postgresql://neondb_owner:npg_9UPWIDR2sVql@ep-frosty-paper-aeh599w0-pooler.c-2.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require")
+            db_url = os.environ.get("DATABASE_URL")
 
             if db_url:
                 # We are on Render! Connect to Postgres
