@@ -1,20 +1,32 @@
 import sqlite3
+import os
 from abc import ABC, abstractmethod
 from functools import wraps
 
 # ==========================================
 # 1. SINGLETON PATTERN (Database Connection)
 # ==========================================
+import psycopg2 # Make sure to import this!
+
 class DatabaseConnection:
     _instance = None
 
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super(DatabaseConnection, cls).__new__(cls)
-            # Connecting to a file-based DB named 'whiskers_wishes.db'
-            # This creates the file if it doesn't exist
-            cls._instance.connection = sqlite3.connect('whiskers_wishes.db', check_same_thread=False)
-            print("[Singleton] Database connection initialized.")
+            
+            # Check if we are on Render by looking for the DATABASE_URL variable
+            db_url = os.environ.get("postgresql://neondb_owner:npg_9UPWIDR2sVql@ep-frosty-paper-aeh599w0-pooler.c-2.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require")
+
+            if db_url:
+                # We are on Render! Connect to Postgres
+                cls._instance.connection = psycopg2.connect(db_url)
+                print("[Singleton] Connected to Render PostgreSQL Database.")
+            else:
+                # We are local! Connect to SQLite
+                cls._instance.connection = sqlite3.connect('whiskers_wishes.db', check_same_thread=False)
+                print("[Singleton] Connected to Local SQLite Database.")
+
         return cls._instance
 
     def get_connection(self):
