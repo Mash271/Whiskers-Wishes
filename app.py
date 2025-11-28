@@ -28,7 +28,7 @@ db_conn = DatabaseConnection().get_connection()
 def home():
     # --- DATA CREATION (BUILDER PATTERN) ---
     # Using the Builder Pattern to create complex Cat objects
-        
+    """
     cat1 = (CatBuilder()
             .set_name("Mochi")
             .set_age("3 Months (Kitten)")
@@ -56,8 +56,11 @@ def home():
     # Convert objects to dicts so Jinja template can render them easily
     # (assuming your HTML uses cat.name, cat.story, etc.)
     featured_cats = [cat1.to_dict(), cat2.to_dict(), cat3.to_dict()]
-
-    return render_template("hello_there.html") 
+    return render_template("hello_there.html", 
+                           featured_cats=featured_cats,
+                           today=datetime.today().strftime("%A, %B %d, %Y"))
+    """
+    return render_template("index.html") 
                          #,featured_cats=featured_cats,
                          #today=datetime.today().strftime("%A, %B %d, %Y"))
 
