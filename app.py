@@ -84,12 +84,7 @@ def login_test():
     mock_session["user_role"] = "Admin"
     return "You are now logged in as Admin. Try visiting <a href='/admin'>/admin</a>"
 
-# 1. Home Link -> href="{{ url_for('home') }}"
-@app.route("/")
-def home():
-    # ... logic ...
-    return render_template("landing_page.html", ...)
-
+# --- NAVIGATION LINKS DEMONSTRATION ---
 # 2. Gallery Link -> href="{{ url_for('gallery') }}"
 @app.route("/gallery")
 def gallery():
