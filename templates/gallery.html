@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cat Gallery - Whiskers & Wishes</title>
+    <style>
+        body { font-family: sans-serif; margin: 0; padding: 20px; background: #f9f9f9; }
+        .filters { text-align: center; margin-bottom: 20px; }
+        .filters a { margin: 0 10px; text-decoration: none; color: #007bff; font-weight: bold; }
+        .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
+        .cat-card { background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .cat-card img { width: 100%; height: 200px; object-fit: cover; }
+        .cat-info { padding: 15px; }
+        .status-badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 0.8em; color: white; }
+        .Available { background-color: #28a745; }
+        .Urgent { background-color: #dc3545; }
+        .Adopted { background-color: #6c757d; }
+        .nav-link { display: block; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <a href="{{ url_for('home') }}" class="nav-link">&larr; Back to Home</a>
+    
+    <h1 style="text-align: center;">Our Cats</h1>
+    
+    <!-- Filter Links that trigger the Strategy Pattern in Backend -->
+    <div class="filters">
+        <span>Filter by: </span>
+        <a href="{{ url_for('gallery') }}">Show All</a> |
+        <a href="{{ url_for('gallery', age='Kitten') }}">Kittens</a> |
+        <a href="{{ url_for('gallery', age='Adult') }}">Adults</a> |
+        <a href="{{ url_for('gallery', status='Urgent') }}">Urgent Needs</a>
+    </div>
+
+    <div class="gallery-grid">
+        {% for cat in cats %}
+        <div class="cat-card">
+            <img src="{{ cat.image }}" alt="{{ cat.name }}">
+            <div class="cat-info">
+                <h2>{{ cat.name }}</h2>
+                <span class="status-badge {{ cat.status }}">{{ cat.status }}</span>
+                <p><strong>Breed:</strong> {{ cat.breed }}</p>
+                <p><strong>Age:</strong> {{ cat.age }}</p>
+                <button>Adopt Me</button>
+            </div>
+        </div>
+        {% else %}
+        <p style="text-align: center;">No cats found matching criteria.</p>
+        {% endfor %}
+    </div>
+</body>
+</html>
