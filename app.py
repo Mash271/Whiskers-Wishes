@@ -56,7 +56,9 @@ def home():
     featured_cats = [cat1.to_dict(), cat2.to_dict(), cat3.to_dict()]
     return render_template("hello_there.html", 
                            featured_cats=featured_cats,
-                           today=datetime.today().strftime("%A, %B %d, %Y"))
+                           today=datetime.today().strftime("%A, %B %d, %Y"),
+                           date=datetime.now(),
+                           name=None)
     
 @app.route("/hello/")
 @app.route("/hello/<name>")
