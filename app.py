@@ -28,7 +28,7 @@ db_conn = DatabaseConnection().get_connection()
 def home():
     # --- DATA CREATION (BUILDER PATTERN) ---
     # Using the Builder Pattern to create complex Cat objects
-    """
+    
     cat1 = (CatBuilder()
             .set_name("Mochi")
             .set_age("3 Months (Kitten)")
@@ -36,7 +36,6 @@ def home():
             .set_status("Available")
             .set_image("https://images.unsplash.com/photo-1533738363-b7f9aef128ce?auto=format&fit=crop&w=400&q=80")
             .build())
-
     cat2 = (CatBuilder()
             .set_name("Luna")
             .set_age("4 Years (Adult)")
@@ -44,7 +43,6 @@ def home():
             .set_status("Available")
             .set_image("https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&w=400&q=80")
             .build())
-
     cat3 = (CatBuilder()
             .set_name("Oscar")
             .set_age("12 Years (Senior)")
@@ -59,11 +57,7 @@ def home():
     return render_template("hello_there.html", 
                            featured_cats=featured_cats,
                            today=datetime.today().strftime("%A, %B %d, %Y"))
-    """
-    return render_template("index.html") 
-                         #,featured_cats=featured_cats,
-                         #today=datetime.today().strftime("%A, %B %d, %Y"))
-
+    
 @app.route("/hello/")
 @app.route("/hello/<name>")
 def hello_there(name = None):
