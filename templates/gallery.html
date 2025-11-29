@@ -5,49 +5,143 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cat Gallery - Whiskers & Wishes</title>
     <style>
-        body { font-family: sans-serif; margin: 0; padding: 20px; background: #f9f9f9; }
-        .filters { text-align: center; margin-bottom: 20px; }
-        .filters a { margin: 0 10px; text-decoration: none; color: #007bff; font-weight: bold; }
-        .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
-        .cat-card { background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .cat-card img { width: 100%; height: 200px; object-fit: cover; }
-        .cat-info { padding: 15px; }
-        .status-badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 0.8em; color: white; }
-        .Available { background-color: #28a745; }
-        .Urgent { background-color: #dc3545; }
-        .Adopted { background-color: #6c757d; }
-        .nav-link { display: block; margin-bottom: 20px; }
+        /* General Reset and Typography */
+        body { 
+            font-family: 'Inter', sans-serif; 
+            margin: 0; 
+            padding: 20px; 
+            background: #f4f6f9; /* Soft background */
+        }
+        
+        /* Navigation and Header */
+        .nav-link { 
+            display: inline-block; 
+            margin-bottom: 20px; 
+            text-decoration: none; 
+            color: #3f72af; /* Deep blue */
+            font-weight: 600; 
+            transition: color 0.3s;
+        }
+        .nav-link:hover { color: #112d4e; } /* Darker blue on hover */
+
+        h1 { 
+            text-align: center; 
+            color: #112d4e; 
+            margin-bottom: 40px; 
+            font-size: 2.5em;
+        }
+
+        /* Filter Area */
+        .filters { text-align: center; margin-bottom: 25px; color: #4a4a4a; }
+
+        /* Gallery Grid Layout (Responsive) */
+        .gallery-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+            gap: 30px; 
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Cat Card Styling */
+        .cat-card { 
+            background: white; 
+            border-radius: 12px; 
+            overflow: hidden; 
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08); /* Soft shadow */
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .cat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
+        }
+        .cat-card img { 
+            width: 100%; 
+            height: 200px; 
+            object-fit: cover; 
+            border-bottom: 1px solid #eee;
+        }
+        .cat-info { padding: 20px; }
+        .cat-info h2 { font-size: 1.6em; margin: 0 0 8px 0; color: #3f72af; }
+        .cat-info p { margin-bottom: 8px; line-height: 1.4; color: #4a4a4a; font-size: 0.95em; }
+        
+        /* Status Badges */
+        .status-badge { 
+            display: inline-block; 
+            padding: 6px 12px; 
+            border-radius: 20px; 
+            font-size: 0.85em; 
+            color: white; 
+            font-weight: bold;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+        .Available { background-color: #28a745; } /* Green */
+        .Urgent { background-color: #dc3545; } /* Red */
+        .Adopted { background-color: #6c757d; } /* Gray - Should not appear here */
+        
+        /* Story Text */
+        .story { 
+            font-style: italic; 
+            color: #666; 
+            margin-top: 10px; 
+            border-top: 1px solid #eee; 
+            padding-top: 10px;
+        }
+
+        /* Apply Button Styling */
+        .apply-button {
+            background-color: #3f72af;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 6px;
+            width: 100%;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 15px;
+            transition: background-color 0.3s ease;
+        }
+        .apply-button:hover {
+            background-color: #112d4e;
+        }
     </style>
 </head>
 <body>
     <a href="{{ url_for('home') }}" class="nav-link">&larr; Back to Home</a>
     
-    <h1 style="text-align: center;">Our Cats</h1>
+    <h1>Cats Ready for Adoption</h1>
     
-    <!-- Filter Links that trigger the Strategy Pattern in Backend -->
     <div class="filters">
-        <span>Filter by: </span>
-        <a href="{{ url_for('gallery') }}">Show All</a> |
-        <a href="{{ url_for('gallery', age='Kitten') }}">Kittens</a> |
-        <a href="{{ url_for('gallery', age='Adult') }}">Adults</a> |
-        <a href="{{ url_for('gallery', status='Urgent') }}">Urgent Needs</a>
+        <p>Showing all cats whose status is **not 'Adopted'**.</p>
     </div>
 
     <div class="gallery-grid">
         {% for cat in cats %}
         <div class="cat-card">
-            <img src="{{ cat.image }}" alt="{{ cat.name }}">
+            <!-- Image tag using the 'image' variable passed from app.py. 
+                 Includes an onerror fallback for missing URLs. -->
+            <img src="{{ cat.image }}" alt="Photo of {{ cat.name }}" onerror="this.onerror=null; this.src='https://placehold.co/400x200/cccccc/333333?text=Image%20Missing'">
+            
             <div class="cat-info">
                 <h2>{{ cat.name }}</h2>
+                <!-- Dynamic status badge based on cat.status -->
                 <span class="status-badge {{ cat.status }}">{{ cat.status }}</span>
+                
+                <p><strong>Age:</strong> {{ cat.age }} years old</p>
                 <p><strong>Breed:</strong> {{ cat.breed }}</p>
-                <p><strong>Age:</strong> {{ cat.age }}</p>
-                <button>Adopt Me</button>
+                
+                <p class="story">{{ cat.story[:120] }}{% if cat.story | length > 120 %}...{% endif %}</p> 
+                
+                <button class="apply-button">Apply to Adopt</button>
             </div>
         </div>
         {% else %}
-        <p style="text-align: center;">No cats found matching criteria.</p>
+        <p style="text-align: center; grid-column: 1 / -1; color: #112d4e; font-size: 1.2em;">
+            No cats are currently available for adoption! Please check back later.
+        </p>
         {% endfor %}
     </div>
+
 </body>
 </html>

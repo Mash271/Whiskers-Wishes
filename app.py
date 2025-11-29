@@ -2,6 +2,7 @@ import os
 from flask import Flask, render_template
 from dotenv import load_dotenv
 from datetime import datetime
+from architectural_patterns import CatRepository
 
 # Import your design patterns
 from design_patterns import (
@@ -23,6 +24,12 @@ app = Flask(__name__)
 db_conn = DatabaseConnection().get_connection()
 if db_conn:
     print("Database connection established successfully.")
+# Function to get available cats using the CatRepository
+def get_available_cats(db_conn):
+    cat_repo = CatRepository(db_conn)
+    return cat_repo.get_available_cats()
+
+
 
 # This route maps the root URL "/" to this function
 @app.route("/")
@@ -87,8 +94,11 @@ def login_test():
 # 2. Gallery Link -> href="{{ url_for('gallery') }}"
 @app.route("/gallery")
 def gallery():
-    # ... logic ...
-    return render_template("gallery.html")
+    # 1. Fetch the data from the database
+    available_cats = get_available_cats(db_conn)
+    
+    # 2. Pass the filtered data to the template
+    return render_template("gallery.html", cats=available_cats)
 
 # 3. About Link -> href="{{ url_for('about') }}"
 @app.route("/about")
