@@ -15,7 +15,7 @@ class DatabaseConnection:
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super(DatabaseConnection, cls).__new__(cls)
-            
+            print("[Singleton] Creating new DatabaseConnection instance.")
             # Check if we are on Render by looking for the DATABASE_URL variable
             db_url = os.environ.get("DATABASE_URL")
 

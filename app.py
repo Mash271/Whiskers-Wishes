@@ -21,7 +21,8 @@ app = Flask(__name__)
 # We initialize the connection once. 
 # Even if we call this multiple times, it returns the same connection instance.
 db_conn = DatabaseConnection().get_connection()
-
+if db_conn:
+    print("Database connection established successfully.")
 
 # This route maps the root URL "/" to this function
 @app.route("/")
@@ -34,7 +35,7 @@ def home():
             .set_age("3 Months (Kitten)")
             .set_story("Found in a cardboard box during a storm, Mochi is a tiny survivor with a huge heart.")
             .set_status("Available")
-            .set_image("https://images.unsplash.com/photo-1533738363-b7f9aef128ce?auto=format&fit=crop&w=400&q=80")
+            .set_image("https://images.unsplash.com/photo-1591871937573-74dbba515c4c?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTR8fGtpdHRlbnxlbnwwfHwwfHx8MA%3D%3D")
             .build())
     cat2 = (CatBuilder()
             .set_name("Luna")
@@ -44,7 +45,7 @@ def home():
             .set_image("https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&w=400&q=80")
             .build())
     cat3 = (CatBuilder()
-            .set_name("Oscar")
+            .set_name("Oscar Sr")
             .set_age("12 Years (Senior)")
             .set_story("Oscar is a wise soul who just wants a warm lap to sleep on.")
             .set_status("Urgent")
