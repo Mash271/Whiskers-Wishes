@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, request, redirect, flash, url_for
+from flask import Flask, render_template, request, redirect, flash, url_for, session
 from dotenv import load_dotenv
 from datetime import datetime
 from architectural_patterns import CatRepository, UserRepository
@@ -17,6 +17,7 @@ from design_patterns import (
 #load_dotenv()
 
 app = Flask(__name__)
+app.secret_key = "dont_tell_anyone_my_secret"
 
 # --- DATABASE SETUP (SINGLETON PATTERN) ---
 # We initialize the connection once. 
@@ -108,8 +109,38 @@ def about():
 # 4. Login Link -> href="{{ url_for('login') }}"
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    # ... logic ...
+    if request.method == "POST":
+        username = request.form.get("username")
+        password = request.form.get("password")
+
+        # 1. Ask the DB for this user
+        repo = UserRepository(db_conn)
+        user = repo.get_user_by_username(username)
+
+        # 2. Check if user exists AND password matches
+        # (Note: We are using plain text passwords for now as per your register code)
+        if user and user['password'] == password:
+            
+            # 3. Save their identity in the Session (The "Cookie")
+            session["user_id"] = user["user_id"]
+            session["username"] = user["username"]
+            session["role"] = user["role"] # 'adopter', 'foster', or 'admin'
+            session["logged_in"] = True
+            
+            print(f"✅ Logged in as: {user['username']} ({user['role']})")
+            
+            # 4. Send them to the home page
+            return redirect(url_for("home"))
+        
+        else:
+            return render_template("login.html", error="Invalid Username or Password")
+
     return render_template("login.html")
+
+@app.route("/logout")
+def logout():
+    session.clear() # Wipes the cookie
+    return redirect(url_for("home"))
 
 # 5. Register Link -> href="{{ url_for('register') }}"
 # Inside app.py
