@@ -8,7 +8,8 @@ from architectural_patterns import CatRepository, UserRepository, AdminRepositor
 from design_patterns import (
     DatabaseConnection, 
     CatBuilder, 
-    UserFactory, 
+    UserFactory,
+    mock_session, 
     admin_required,
     AdoptionSubject,
     UserNotificationObserver
