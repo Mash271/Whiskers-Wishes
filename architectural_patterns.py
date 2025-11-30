@@ -72,8 +72,6 @@ class UserRepository:
     def __init__(self, db_conn):
         self.conn = db_conn
 
-    # ... existing get_user_by_username method ...
-
     def create_user(self, username, email, password, full_name, user_type):
         """
         Creates a new user in the database.

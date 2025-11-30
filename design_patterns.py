@@ -3,6 +3,7 @@ import os
 from abc import ABC, abstractmethod
 from functools import wraps
 from dotenv import load_dotenv
+from flask import session
 
 # ==========================================
 # 1. SINGLETON PATTERN (Database Connection)
@@ -156,34 +157,50 @@ class CatGallery:
 # ==========================================
 class Observer(ABC):
     @abstractmethod
-    def update(self, status):
+    def update(self, status, message=None):
         pass
 
-class EmailNotification(Observer):
-    def update(self, status):
-        print(f"[Observer] Email sent: Your application status is now '{status}'.")
-
-class CatStatusUpdater(Observer):
-    def update(self, status):
-        if status == "Approved":
-            print("[Observer] System updated cat status to 'Adopted'.")
-
-class AdoptionApplication:
-    def __init__(self, applicant_name):
-        self.applicant = applicant_name
+class AdoptionSubject:
+    """
+    The 'Subject' that maintains a list of observers (users) and notifies them.
+    """
+    def __init__(self, app_id):
+        self.app_id = app_id
         self._observers = []
         self._status = "Pending"
 
     def attach(self, observer):
         self._observers.append(observer)
 
-    def set_status(self, new_status):
+    def process_decision(self, new_status, rejection_reason=None):
         self._status = new_status
-        self.notify()
+        self.notify(rejection_reason)
 
-    def notify(self):
+    def notify(self, reason=None):
+        print(f"\n[Observer Pattern Triggered] Processing Application #{self.app_id} -> {self._status}")
         for observer in self._observers:
-            observer.update(self._status)
+            observer.update(self._status, reason)
+
+# Concrete Observer: User Notification System
+class UserNotificationObserver(Observer):
+    def __init__(self, username, email, user_type):
+        self.username = username
+        self.email = email
+        self.user_type = user_type
+
+    def update(self, status, reason=None):
+        # Logic: 
+        # 1. Notify BOTH Adopter and Foster if 'Approved'
+        # 2. Notify ONLY Adopter if 'Rejected' (with reason)
+        
+        if status == "Approved":
+            print(f"📧 EMAIL TO {self.user_type.upper()} ({self.email}): "
+                  f"Great news, {self.username}! The adoption has been APPROVED.")
+        
+        elif status == "Rejected" and self.user_type == "adopter":
+             print(f"📧 EMAIL TO ADOPTER ({self.email}): "
+                   f"Dear {self.username}, your adoption request was declined. Reason: {reason}")
+
 
 # ==========================================
 # 6. DECORATOR PATTERN (Route Protection)
@@ -203,7 +220,9 @@ def login_required(f):
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if mock_session["user_role"] != "Admin":
-            return "<h1>Access Denied: Admins only.</h1>", 403
+        user_role = session.get("role")
+        # Check for both "Admin" (hardcoded) and "admin" (database)
+        if str(user_role).lower() != "admin":
+            return "<h1>Access Denied: Admin privileges required.</h1>", 403
         return f(*args, **kwargs)
     return decorated_function

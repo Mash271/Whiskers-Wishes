@@ -23,8 +23,10 @@ app.secret_key = "dont_tell_anyone_my_secret"
 # We initialize the connection once. 
 # Even if we call this multiple times, it returns the same connection instance.
 db_conn = DatabaseConnection().get_connection()
-if db_conn:
-    print("Database connection established successfully.")
+if db_conn is None:
+    raise RuntimeError("❌ CRITICAL ERROR: Could not connect to the database. Check your DATABASE_URL and logs.")
+else:
+    print("✅ Database connection established successfully.")
 # Function to get available cats using the CatRepository
 def get_available_cats(db_conn):
     cat_repo = CatRepository(db_conn)
@@ -82,14 +84,7 @@ def hello_there(name = None):
 @app.route("/admin")
 @admin_required
 def admin_panel():
-    return "<h1>Welcome to the Secret Admin Panel!</h1><p>You can only see this if logged in as Admin.</p>"
-
-# Route to simulate logging in (for testing the decorator)
-@app.route("/login-admin")
-def login_test():
-    mock_session["is_logged_in"] = True
-    mock_session["user_role"] = "Admin"
-    return "You are now logged in as Admin. Try visiting <a href='/admin'>/admin</a>"
+    return render_template("admin.html", user=session.get("username"))
 
 # --- NAVIGATION LINKS DEMONSTRATION ---
 # 2. Gallery Link -> href="{{ url_for('gallery') }}"
@@ -106,36 +101,122 @@ def gallery():
 def about():
     return render_template("about.html")
 
-# 4. Login Link -> href="{{ url_for('login') }}"
+# ==========================================
+# AUTH ROUTES
+# ==========================================
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
         username = request.form.get("username")
         password = request.form.get("password")
 
-        # 1. Ask the DB for this user
+        # Hardcoded Admin Backdoor
+        if username == "Admin" and password == "67890":
+            session["user_id"] = 0
+            session["username"] = "Admin"
+            session["role"] = "admin"
+            session["logged_in"] = True
+            return redirect(url_for("admin_dashboard"))
+
+        # Database Login
         repo = UserRepository(db_conn)
         user = repo.get_user_by_username(username)
-
-        # 2. Check if user exists AND password matches
-        # (Note: We are using plain text passwords for now as per your register code)
+        
         if user and user['password'] == password:
-            
-            # 3. Save their identity in the Session (The "Cookie")
             session["user_id"] = user["user_id"]
             session["username"] = user["username"]
-            session["role"] = user["role"] # 'adopter', 'foster', or 'admin'
+            session["role"] = user["role"]
             session["logged_in"] = True
             
-            print(f"✅ Logged in as: {user['username']} ({user['role']})")
-            
-            # 4. Send them to the home page
+            if user["role"] == "admin":
+                return redirect(url_for("admin_dashboard"))
             return redirect(url_for("home"))
-        
-        else:
-            return render_template("login.html", error="Invalid Username or Password")
-
+            
+        return render_template("login.html", error="Invalid credentials")
     return render_template("login.html")
+
+
+@app.route("/admin")
+@admin_required
+def admin_dashboard():
+    # Main Menu
+    return render_template("admin.html", user=session.get("username"))
+
+@app.route("/admin/users")
+@admin_required
+def admin_users():
+    repo = AdminRepository(db_conn)
+    users = repo.get_all_users()
+    return render_template("admin_users.html", users=users)
+
+@app.route("/admin/cats")
+@admin_required
+def admin_cats():
+    # Reusing CatRepository to get inventory
+    repo = CatRepository(db_conn)
+    # We ideally want ALL cats, even adopted ones, but for now we use available
+    cats = repo.get_available_cats() 
+    return render_template("admin_cats.html", cats=cats)
+
+@app.route("/admin/applications")
+@admin_required
+def admin_applications():
+    repo = AdminRepository(db_conn)
+    apps = repo.get_pending_applications()
+    return render_template("admin_applications.html", applications=apps)
+
+@app.route("/admin/process/<int:app_id>", methods=["GET", "POST"])
+@admin_required
+def admin_process_adoption(app_id):
+    repo = AdminRepository(db_conn)
+    
+    if request.method == "POST":
+        action = request.form.get("action") # 'approve' or 'decline'
+        reason = request.form.get("reason", "")
+        
+        # 1. Fetch details to setup Observers
+        details = repo.get_application_details(app_id)
+        if not details:
+            return "Application not found", 404
+
+        # 2. Setup Observer Pattern
+        adoption_subject = AdoptionSubject(app_id)
+        
+        # Add Adopter Observer
+        adopter_observer = UserNotificationObserver(details['applicant_name'], details['applicant_email'], "adopter")
+        adoption_subject.attach(adopter_observer)
+        
+        # Add Foster Observer (Mocking a generic foster for now, or fetching if we had one)
+        foster_observer = UserNotificationObserver("Foster Parent", "foster@example.com", "foster")
+        adoption_subject.attach(foster_observer)
+
+        # 3. Process Logic
+        if action == "approve":
+            # Update DB
+            success = repo.update_application_status(app_id, "Approved")
+            if success:
+                # Trigger Observers
+                adoption_subject.process_decision("Approved")
+                flash("Adoption Approved! Emails sent.", "success")
+            else:
+                flash("Database Error.", "error")
+                
+        elif action == "decline":
+            if not reason:
+                return "Error: Rejection reason required.", 400
+            
+            # Update DB
+            repo.update_application_status(app_id, "Rejected", reason)
+            # Trigger Observers
+            adoption_subject.process_decision("Rejected", reason)
+            flash("Adoption Declined. Applicant notified.", "warning")
+
+        return redirect(url_for("admin_applications"))
+
+    # GET Request: Show form
+    details = repo.get_application_details(app_id)
+    return render_template("admin_process_adoption.html", app=details)
+
 
 @app.route("/logout")
 def logout():

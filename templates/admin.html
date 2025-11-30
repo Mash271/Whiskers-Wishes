@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Admin Dashboard</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f6f9; padding: 40px; }
+        .header { text-align: center; margin-bottom: 40px; color: #2c3e50; }
+        .menu-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; max-width: 900px; margin: 0 auto; }
+        .menu-card { background: white; padding: 30px; border-radius: 10px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: transform 0.2s; text-decoration: none; color: inherit; }
+        .menu-card:hover { transform: translateY(-5px); box-shadow: 0 8px 15px rgba(0,0,0,0.1); }
+        .icon { font-size: 3em; margin-bottom: 15px; display: block; }
+        h3 { margin: 0; color: #34495e; }
+        .logout { display: block; text-align: center; margin-top: 40px; color: #e74c3c; text-decoration: none; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Admin Control Panel</h1>
+        <p>Welcome back, {{ user }}</p>
+    </div>
+
+    <div class="menu-grid">
+        <a href="{{ url_for('admin_users') }}" class="menu-card">
+            <span class="icon">👥</span>
+            <h3>Manage Users</h3>
+            <p>View Adopters & Fosters</p>
+        </a>
+
+        <a href="{{ url_for('admin_cats') }}" class="menu-card">
+            <span class="icon">🐱</span>
+            <h3>Manage Inventory</h3>
+            <p>View Available Cats</p>
+        </a>
+
+        <a href="{{ url_for('admin_applications') }}" class="menu-card">
+            <span class="icon">📝</span>
+            <h3>Adoption Requests</h3>
+            <p>Process Pending Applications</p>
+        </a>
+    </div>
+
+    <a href="/logout" class="logout">Logout</a>
+</body>
+</html>
