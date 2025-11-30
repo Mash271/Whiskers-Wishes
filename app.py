@@ -2,15 +2,16 @@ import os
 from flask import Flask, render_template, request, redirect, flash, url_for, session
 from dotenv import load_dotenv
 from datetime import datetime
-from architectural_patterns import CatRepository, UserRepository
+from architectural_patterns import CatRepository, UserRepository, AdminRepository
 
 # Import your design patterns
 from design_patterns import (
     DatabaseConnection, 
     CatBuilder, 
     UserFactory, 
-    mock_session, 
-    admin_required
+    admin_required,
+    AdoptionSubject,
+    UserNotificationObserver
 )
 
 # Load environment variables from .env file

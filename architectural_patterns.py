@@ -143,3 +143,146 @@ class UserRepository:
             if self.conn:
                 self.conn.rollback()
             return None
+        
+    def get_user_by_id(self, user_id):
+        """Fetches a user record by user ID."""
+        try:
+            cur = self.conn.cursor()
+            
+            # CRITICAL FIX: Use placeholder correctly and pass parameters separately
+            query = f"""
+                SELECT user_id, username, user_type, full_name, email 
+                FROM users 
+                WHERE user_id = {self.placeholder}
+            """
+            cur.execute(query, (user_id,))
+            row = cur.fetchone()
+            cur.close()
+            if row:
+                return {"id": row[0], "username": row[1], "role": row[2], "full_name": row[3], "email": row[4]}
+            return None
+        except Exception as e:
+            print(f"Error fetching user by id: {e}")
+            return None
+        
+    
+
+# NEW: Repository specifically for Admin tasks
+class AdminRepository:
+    """Repository for administrative data fetching and modification."""
+    def __init__(self, db_conn):
+        """Initializes the repository with a database connection."""
+        self.conn = db_conn
+        
+    def get_all_users(self):
+        """Fetches all users except admins, excludes passwords."""
+        try:
+            cur = self.conn.cursor()
+            query = """
+                SELECT user_id, full_name, username, email, user_type 
+                FROM users 
+                WHERE user_type != 'admin'
+            """
+            cur.execute(query)
+            rows = cur.fetchall()
+            cur.close()
+            users = []
+            for row in rows:
+                users.append({
+                    "id": row[0], "full_name": row[1], "username": row[2], 
+                    "email": row[3], "role": row[4]
+                })
+            return users
+        except Exception as e:
+            print(f"Error getting users: {e}")
+            return []
+
+    def get_pending_applications(self):
+        """Joins Applications, Users, and Cats to get full details for pending apps."""
+        try:
+            cur = self.conn.cursor()
+            # The query is complex because of the separation into `adopters` table
+            query = """
+                SELECT 
+                    a.application_id, u.full_name, c.name, a.application_status, a.cat_id, u.user_id
+                FROM adoption_applications a
+                JOIN adopters d ON a.adopter_id = d.adopter_id
+                JOIN users u ON d.user_id = u.user_id
+                JOIN cats c ON a.cat_id = c.cat_id
+                WHERE a.application_status = 'Pending'
+            """
+            cur.execute(query)
+            rows = cur.fetchall()
+            cur.close()
+            apps = []
+            for row in rows:
+                apps.append({
+                    "app_id": row[0], "applicant_name": row[1], "cat_name": row[2], 
+                    "status": row[3], "cat_id": row[4], "user_id": row[5] # user_id is the main users.user_id
+                })
+            return apps
+        except Exception as e:
+            print(f"Error getting pending applications: {e}")
+            return []
+    
+    def get_application_details(self, app_id):
+        """Gets deep details for the processing page by application ID."""
+        try:
+            cur = self.conn.cursor()
+            
+            # Query to fetch all necessary details
+            query = f"""
+                SELECT 
+                    a.application_id, 
+                    u.full_name, u.email, u.user_type, 
+                    c.name, c.breed, c.age, c.image_url, 
+                    a.application_status, 
+                    c.cat_id, 
+                    u.user_id
+                FROM adoption_applications a
+                JOIN adopters d ON a.adopter_id = d.adopter_id
+                JOIN users u ON d.user_id = u.user_id
+                JOIN cats c ON a.cat_id = c.cat_id
+                WHERE a.application_id = {self.placeholder}
+            """
+            cur.execute(query, (app_id,))
+            row = cur.fetchone()
+            cur.close()
+            if row:
+                return {
+                    "id": row[0], "applicant_name": row[1], "applicant_email": row[2],
+                    "applicant_role": row[3], "cat_name": row[4], "cat_breed": row[5],
+                    "cat_age": row[6], "cat_image": row[7], "status": row[8],
+                    "cat_db_id": row[9], "user_db_id": row[10]
+                }
+            return None
+        except Exception as e:
+            print(f"Error getting application details: {e}")
+            return None
+
+    def update_application_status(self, app_id, new_status, reason=None):
+        """Updates the status of an application and the related cat status if approved."""
+        try:
+            cur = self.conn.cursor()
+            
+            # 1. Update Application Status
+            update_app_query = f"UPDATE adoption_applications SET application_status = {self.placeholder}, rejection_reason = {self.placeholder} WHERE application_id = {self.placeholder}"
+            cur.execute(update_app_query, (new_status, reason, app_id))
+            
+            # 2. If Approved, update Cat's status
+            if new_status == 'Approved':
+                # First find the cat_id associated with the application
+                find_cat_query = f"SELECT cat_id FROM adoption_applications WHERE application_id = {self.placeholder}"
+                cur.execute(find_cat_query, (app_id,))
+                cat_id = cur.fetchone()[0]
+                
+                # Update Cat status
+                update_cat_query = f"UPDATE cats SET application_status = 'Adopted' WHERE cat_id = {self.placeholder}"
+                cur.execute(update_cat_query, (cat_id,))
+            
+            self.conn.commit()
+            return True
+        except Exception as e:
+            print(f"Error updating application status: {e}")
+            self.conn.rollback()
+            return False

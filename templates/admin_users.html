@@ -35,7 +35,7 @@
                 <td>{{ user.username }}</td>
                 <td>{{ user.email }}</td>
                 <td>
-                    <span style="padding: 4px 8px; border-radius: 4px; background: {{ '#d1e7dd' if user.role == 'adopter' else '#fff3cd' }}">
+                    <span style="padding: 4px 8px; border-radius: 4px; background: '{{ '#d1e7dd' if user.role == 'adopter' else '#fff3cd' }}'"></span>
                         {{ user.role }}
                     </span>
                 </td>
