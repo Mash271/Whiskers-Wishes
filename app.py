@@ -1,8 +1,8 @@
 import os
-from flask import Flask, render_template
+from flask import Flask, render_template, request, redirect, flash, url_for
 from dotenv import load_dotenv
 from datetime import datetime
-from architectural_patterns import CatRepository
+from architectural_patterns import CatRepository, UserRepository
 
 # Import your design patterns
 from design_patterns import (
@@ -112,8 +112,44 @@ def login():
     return render_template("login.html")
 
 # 5. Register Link -> href="{{ url_for('register') }}"
-@app.route("/register")
+# Inside app.py
+
+@app.route("/register", methods=["GET", "POST"])
 def register():
+    if request.method == "POST":
+        # 1. Get data from the HTML form
+        user_type = request.form.get("role")
+        
+        # Get the username directly from the form
+        username = request.form.get("username") 
+        
+        # (Delete the old line that said: username = email.split("@")[0])
+
+        full_name = request.form.get("full_name")
+        email = request.form.get("email")
+        password = request.form.get("password")
+        confirm_password = request.form.get("confirm_password")
+
+        # 2. Validation
+        if password != confirm_password:
+            return render_template("register.html", error="Passwords do not match!")
+
+        # 3. Save to Database
+        user_repo = UserRepository(db_conn)
+
+        # Check if username ALREADY exists
+        if user_repo.get_user_by_username(username):
+            return render_template("register.html", error="That username is already taken!")
+
+        # Create the user
+        new_id = user_repo.create_user(username, email, password, full_name, user_type)
+        
+        if new_id:
+            print(f"✅ User Created: {username} (ID: {new_id})")
+            return redirect(url_for('login'))
+        else:
+            return render_template("register.html", error="Registration failed. Username or Email might be taken.")
+
     return render_template("register.html")
 
 if __name__ == "__main__":
