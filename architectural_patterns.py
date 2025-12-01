@@ -12,6 +12,7 @@ class CatRepository:
 
     def get_available_cats(self):
         self.conn = DatabaseConnection().get_connection()
+        print("entered get_all_cats in catrepository 1️⃣")
         """
         Fetches all cats from the database whose application_status is not 'Adopted'.
         
@@ -20,6 +21,7 @@ class CatRepository:
         """
         try:
             cur = self.conn.cursor()
+            print("entered get_available_cats 2️⃣")
             # SQL Query to select cats that are not adopted
             sql_query = """
                 SELECT 
@@ -36,6 +38,7 @@ class CatRepository:
             cur.execute(sql_query)
             cat_records = cur.fetchall()
             cur.close()
+            print("3️⃣ about to enter loop to convert into list of dicts in catrepo getavailablecats")
 
             # Define column names explicitly for easy dictionary creation
             column_names = ['id', 'name', 'age', 'breed', 'story', 'status']
@@ -43,8 +46,9 @@ class CatRepository:
             # Convert records into a list of dictionaries for easy rendering in Flask/Jinja
             cats_list = []
             for record in cat_records:
+                print("4️⃣ entered loop in catrepository")
                 cat_data = dict(zip(column_names, record))
-                print("entered get_all_cats in catrepository")
+                print("4️5️⃣ executed zip in getavailablecats in catrepository")
                 # Temporary addition of a placeholder image (as we don't have cat_photos join yet)
                 cat_data['image'] = f"https://placehold.co/400x200/50c4db/white?text={cat_data['name']}"
                 
@@ -52,7 +56,7 @@ class CatRepository:
                 cat_data['age'] = f"{cat_data['age']}" 
                 
                 cats_list.append(cat_data)
-                
+             
             return cats_list
 
         except psycopg2.Error as e:
@@ -174,6 +178,7 @@ class AdminRepository:
         self.conn = DatabaseConnection().get_connection()
         """Fetches all users except admins, excludes passwords."""
         try:
+            print("entered get_all_users in adminrepository")
             cur = self.conn.cursor()
             query = """
                 SELECT user_id, full_name, username, email, user_type 

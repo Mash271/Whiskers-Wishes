@@ -1,16 +1,21 @@
-#this is where i hardcode some seed data for the database
-import os
-import psycopg2
-from dotenv import load_dotenv
-from design_patterns import CatBuilder # Reuse your builder pattern
-from werkzeug.security import generate_password_hash # Used for dummy user password
+# seed_data.py
 
-# Load environment variables (including DATABASE_URL)
+# ==========================================
+# 1. IMPORTS
+# ==========================================
+import os
+import psycopg2 # Used for the Render connection (if needed)
+import sqlite3 # Used for the local connection (if needed)
+from dotenv import load_dotenv
+from design_patterns import CatBuilder 
+from design_patterns import DatabaseConnection # <-- ⭐️ Import the Singleton Class
+from werkzeug.security import generate_password_hash 
+
+# Load environment variables
 load_dotenv()
 
-# --- 1. DEFINE DATA TO INSERT ---
+# --- 2. DEFINE DATA TO INSERT (Keep this section as is) ---
 
-# Note: We must insert a foster user first to get a valid foster_id.
 DUMMY_PASSWORD = generate_password_hash("password123") 
 FOSTER_USER_DATA = {
     "username": "admin_foster",
@@ -20,48 +25,24 @@ FOSTER_USER_DATA = {
     "full_name": "Admin Foster"
 }
 
-# The sample cats data using your CatBuilder
-# We are simplifying 'age' to an INTEGER for the DB.
 cats_data = [
-    (CatBuilder()
-        .set_name("Mochi")
-        .set_age(3) # Simplified to integer
-        .set_breed("Domestic Shorthair")
-        .set_story("Found in a cardboard box during a storm, Mochi is a tiny survivor with a huge heart.")
-        .set_status("Available")
-        .set_image("https://images.unsplash.com/photo-1533738363-b7f9aef128ce?auto=format&fit=crop&w=400&q=80")
-        .build()),
-    (CatBuilder()
-        .set_name("Luna")
-        .set_age(4) # Simplified to integer
-        .set_breed("Calico")
-        .set_story("Luna is a calm, sophisticated lady who enjoys birdwatching from the window.")
-        .set_status("Available")
-        .set_image("https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&w=400&q=80")
-        .build()),
-    (CatBuilder()
-        .set_name("Oscar")
-        .set_age(12) # Simplified to integer
-        .set_breed("Tuxedo")
-        .set_story("Oscar is a wise soul who just wants a warm lap to sleep on.")
-        .set_status("Urgent")
-        .set_image("https://images.unsplash.com/photo-1573865526739-10659fec78a5?auto=format&fit=crop&w=400&q=80")
-        .build()),
+    # Mochi, Luna, Oscar data (as you defined above)
+    (CatBuilder().set_name("Mochi").set_age(3).set_breed("Domestic Shorthair").set_story("...").set_status("Available").set_image("...").build()),
+    (CatBuilder().set_name("Luna").set_age(4).set_breed("Calico").set_story("...").set_status("Available").set_image("...").build()),
+    (CatBuilder().set_name("Oscar").set_age(12).set_breed("Tuxedo").set_story("...").set_status("Urgent").set_image("...").build()),
 ]
 
-# --- 2. DATABASE INSERTION LOGIC ---
+# --- 3. DATABASE INSERTION LOGIC (Function now accepts conn object) ---
 
-def seed_data():
-    url = os.environ.get("DATABASE_URL")
-    if not url:
-        print("❌ Error: DATABASE_URL not found. Ensure your .env file is set up.")
-        return
-
+def seed_data(conn):
+    """
+    Inserts all hardcoded user and cat data into the provided database connection.
+    """
+    cur = None # Initialize cur for safe cleanup
     try:
-        conn = psycopg2.connect(url)
         cur = conn.cursor()
 
-        print("Connected to NeonDB. Starting data insertion...")
+        print(f"Connected to DB ({conn.info.host if isinstance(conn, psycopg2.extensions.connection) else 'SQLite'}). Starting data insertion...")
 
         # --- A. INSERT FOSTER USER ---
         # 1. Insert into users table
@@ -84,9 +65,8 @@ def seed_data():
             INSERT INTO foster_users (user_id) VALUES (%s) RETURNING foster_id;
         """
         cur.execute(foster_insert_sql, (foster_user_id,))
-        # This foster_id is required for the cats table
         foster_id = cur.fetchone()[0] 
-        print(f"   ✅ Foster User (ID: {foster_user_id}) and Foster Link (ID: {foster_id}) created.")
+        print(f"   ✅ Foster User (ID: {foster_user_id}) and Foster Link (ID: {foster_id}) created.")
 
         # --- B. INSERT CATS ---
         cat_insert_sql = """
@@ -97,31 +77,36 @@ def seed_data():
         inserted_count = 0
         for cat in cats_data:
             cur.execute(cat_insert_sql, (
-                foster_id,              # foster_id (from above)
-                cat.name,               # name
-                cat.age,                # age (integer)
-                cat.breed,              # breed
-                cat.story,              # story maps to bio column
-                cat.status              # application_status
+                foster_id,          
+                cat.name,           
+                cat.age,            
+                cat.breed,          
+                cat.story,          
+                cat.status          
             ))
             inserted_count += 1
             
         conn.commit()
-        print(f"   ✅ Successfully inserted {inserted_count} sample cats.")
+        print(f"   ✅ Successfully inserted {inserted_count} sample cats.")
 
     except Exception as e:
         print(f"❌ An error occurred during seeding: {e}")
         # Rollback in case of error
-        if 'conn' in locals() and conn:
-            conn.rollback()
+        conn.rollback()
     finally:
-        # Always close the connection
-        if 'conn' in locals() and conn:
+        # Only close the cursor, do NOT close the connection if it's a Singleton
+        if cur:
             cur.close()
-            conn.close()
-            print("Database connection closed.")
+        # print("Database connection (Singleton) kept open.") # Optional print
 
+# --- 4. EXECUTION BLOCK (How to run this script standalone) ---
 
 if __name__ == "__main__":
-    # You must run init_db.py at least once before running this script!
-    seed_data()
+    # 1. Get the connection from the Singleton
+    db_conn_instance = DatabaseConnection()
+    conn = db_conn_instance.get_connection()
+
+    # 2. Execute the seeding function
+    seed_data(conn)
+
+    print("\nSeeding script finished.")

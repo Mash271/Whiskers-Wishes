@@ -29,6 +29,8 @@ if db_conn is None:
     raise RuntimeError("❌ CRITICAL ERROR: Could not connect to the database. Check your DATABASE_URL and logs.")
 else:
     print("✅ Database connection established successfully.")
+
+
 # Function to get available cats using the CatRepository
 def get_available_cats(db_conn):
     cat_repo = CatRepository(db_conn)
@@ -93,7 +95,7 @@ def admin_panel():
 @app.route("/gallery")
 def gallery():
     # 1. Fetch the data from the database
-    available_cats = get_available_cats(db_conn)
+    available_cats = get_available_cats()
     
     # 2. Pass the filtered data to the template
     return render_template("gallery.html", cats=available_cats)
@@ -158,6 +160,7 @@ def admin_cats():
     repo = CatRepository()
     # We ideally want ALL cats, even adopted ones, but for now we use available
     cats = repo.get_available_cats()
+    
     return render_template("admin_cats.html", cats=cats)
 
 @app.route("/admin/applications")
