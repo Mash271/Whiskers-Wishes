@@ -95,7 +95,7 @@ def admin_panel():
 @app.route("/gallery")
 def gallery():
     # 1. Fetch the data from the database
-    available_cats = get_available_cats()
+    available_cats = get_available_cats(db_conn)
     
     # 2. Pass the filtered data to the template
     return render_template("gallery.html", cats=available_cats)
@@ -157,7 +157,7 @@ def admin_users():
 @admin_required
 def admin_cats():
     # Reusing CatRepository to get inventory
-    repo = CatRepository()
+    repo = CatRepository(conn=db_conn)
     # We ideally want ALL cats, even adopted ones, but for now we use available
     cats = repo.get_available_cats()
     

@@ -8,10 +8,11 @@ class CatRepository:
     This abstracts the database logic (SQL, psycopg2 details) away from the 
     application's core business logic (app.py).
     """
-        
+    def __init__(self, conn):
+        #'self' is NEVER passed as a parameter
+        self.conn = conn
 
     def get_available_cats(self):
-        self.conn = DatabaseConnection().get_connection()
         print("entered get_all_cats in catrepository 1️⃣")
         """
         Fetches all cats from the database whose application_status is not 'Adopted'.
