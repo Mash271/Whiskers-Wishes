@@ -123,7 +123,7 @@ def login():
             return redirect(url_for("admin_dashboard"))
 
         # Database Login
-        repo = UserRepository(db_conn)
+        repo = UserRepository()
         user = repo.get_user_by_username(username)
         
         if user and user['password'] == password:
