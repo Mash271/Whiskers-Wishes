@@ -147,7 +147,7 @@ def admin_dashboard():
 @app.route("/admin/users")
 @admin_required
 def admin_users():
-    repo = AdminRepository(db_conn)
+    repo = AdminRepository()
     users = repo.get_all_users()
     return render_template("admin_users.html", users=users)
 
@@ -155,22 +155,22 @@ def admin_users():
 @admin_required
 def admin_cats():
     # Reusing CatRepository to get inventory
-    repo = CatRepository(db_conn)
+    repo = CatRepository()
     # We ideally want ALL cats, even adopted ones, but for now we use available
-    cats = repo.get_available_cats() 
+    cats = repo.get_available_cats()
     return render_template("admin_cats.html", cats=cats)
 
 @app.route("/admin/applications")
 @admin_required
 def admin_applications():
-    repo = AdminRepository(db_conn)
+    repo = AdminRepository() #new adminrepository() object to call its functions
     apps = repo.get_pending_applications()
     return render_template("admin_applications.html", applications=apps)
 
 @app.route("/admin/process/<int:app_id>", methods=["GET", "POST"])
 @admin_required
 def admin_process_adoption(app_id):
-    repo = AdminRepository(db_conn)
+    repo = AdminRepository()
     
     if request.method == "POST":
         action = request.form.get("action") # 'approve' or 'decline'

@@ -1,5 +1,5 @@
 import psycopg2
-
+from design_patterns import DatabaseConnection
 class CatRepository:
     """
     Implements the Repository Pattern, acting as the Data Access Layer (DAL) 
@@ -8,11 +8,10 @@ class CatRepository:
     This abstracts the database logic (SQL, psycopg2 details) away from the 
     application's core business logic (app.py).
     """
-    def __init__(self, db_conn):
-        """Initializes the repository with a database connection."""
-        self.conn = db_conn
+        
 
     def get_available_cats(self):
+        self.conn = DatabaseConnection().get_connection()
         """
         Fetches all cats from the database whose application_status is not 'Adopted'.
         
@@ -21,7 +20,6 @@ class CatRepository:
         """
         try:
             cur = self.conn.cursor()
-            
             # SQL Query to select cats that are not adopted
             sql_query = """
                 SELECT 
@@ -46,7 +44,7 @@ class CatRepository:
             cats_list = []
             for record in cat_records:
                 cat_data = dict(zip(column_names, record))
-                
+                print("entered get_all_cats in catrepository")
                 # Temporary addition of a placeholder image (as we don't have cat_photos join yet)
                 cat_data['image'] = f"https://placehold.co/400x200/50c4db/white?text={cat_data['name']}"
                 
@@ -69,14 +67,13 @@ class CatRepository:
 # In architectural_patterns.py
 
 class UserRepository:
-    def __init__(self, db_conn):
-        self.conn = db_conn
-
+    
     def create_user(self, username, email, password, full_name, user_type):
         """
         Creates a new user in the database.
         Returns the new user_id if successful, or None if failed.
         """
+        self.conn = DatabaseConnection().get_connection()
         try:
             cur = self.conn.cursor()
             
@@ -108,6 +105,7 @@ class UserRepository:
             return None
         
     def get_user_by_username(self, username):
+        self.conn = DatabaseConnection().get_connection()
         """
         Fetches a user record by their username.
         Returns a dictionary containing user details or None if not found.
@@ -146,6 +144,7 @@ class UserRepository:
         
     def get_user_by_id(self, user_id):
         """Fetches a user record by user ID."""
+        self.conn = DatabaseConnection().get_connection()
         try:
             cur = self.conn.cursor()
             
@@ -170,11 +169,9 @@ class UserRepository:
 # NEW: Repository specifically for Admin tasks
 class AdminRepository:
     """Repository for administrative data fetching and modification."""
-    def __init__(self, db_conn):
-        """Initializes the repository with a database connection."""
-        self.conn = db_conn
-        
+    
     def get_all_users(self):
+        self.conn = DatabaseConnection().get_connection()
         """Fetches all users except admins, excludes passwords."""
         try:
             cur = self.conn.cursor()
@@ -198,6 +195,7 @@ class AdminRepository:
             return []
 
     def get_pending_applications(self):
+        self.conn = DatabaseConnection().get_connection()
         """Joins Applications, Users, and Cats to get full details for pending apps."""
         try:
             cur = self.conn.cursor()
@@ -226,6 +224,7 @@ class AdminRepository:
             return []
     
     def get_application_details(self, app_id):
+        self.conn = DatabaseConnection().get_connection()
         """Gets deep details for the processing page by application ID."""
         try:
             cur = self.conn.cursor()
@@ -262,6 +261,7 @@ class AdminRepository:
 
     def update_application_status(self, app_id, new_status, reason=None):
         """Updates the status of an application and the related cat status if approved."""
+        self.conn = DatabaseConnection().get_connection()
         try:
             cur = self.conn.cursor()
             
