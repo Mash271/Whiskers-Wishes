@@ -26,7 +26,7 @@ The goal of this project is to create a cat adoption service that is simple, eas
 ### TeckStack 
 ```
 framework: python flask
-database:
+database: mySQL
 frontend: html, css  
 ```
 
