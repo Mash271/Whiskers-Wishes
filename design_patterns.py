@@ -8,39 +8,31 @@ import psycopg2
 # ==========================================
 # 1. SINGLETON PATTERN (Database Connection)
 # ==========================================
-# Updated Singleton Pattern
-# Ensures no external code can instantiate the class directly.
-# Python does not support private constructors, but this enforces correct Singleton behavior.
+import psycopg2 # Make sure to import this!
 
-class _DatabaseSingleton:
+class DatabaseConnection:
     _instance = None
 
-    def __new__(cls, *args, **kwargs):
-        # Enforces single shared instance
+    def __new__(cls):
         if cls._instance is None:
-            cls._instance = super().__new__(cls)
+            cls._instance = super(DatabaseConnection, cls).__new__(cls)
+            print("[Singleton] Creating new DatabaseConnection instance.")
+            # Check if we are on Render by looking for the DATABASE_URL variable
+            db_url = os.environ.get("DATABASE_URL")
+
+            if db_url:
+                # We are on Render! Connect to Postgres
+                cls._instance.connection = psycopg2.connect(db_url)
+                print("[Singleton] Connected to Render PostgreSQL Database.")
+            else:
+                # We are local! Connect to SQLite
+                cls._instance.connection = sqlite3.connect('whiskers_wishes.db', check_same_thread=False)
+                print("[Singleton] Connected to Local SQLite Database.")
+
         return cls._instance
 
-    def __init__(self, connection_func=None):
-        # Prevents reinitialization after first creation
-        if not hasattr(self, "_initialized"):
-            self.connection_func = connection_func
-            self._initialized = True
-
     def get_connection(self):
-        if self.connection_func:
-            return self.connection_func()
-        raise RuntimeError("No database connection function supplied.")
-
-
-# Public accessor — only safe way to obtain the Singleton
-_singleton_instance = None
-
-def get_database_singleton(connection_func=None):
-    global _singleton_instance
-    if _singleton_instance is None:
-        _singleton_instance = _DatabaseSingleton(connection_func)
-    return _singleton_instance
+        return self.connection
 
 # ==========================================
 # 2. FACTORY METHOD PATTERN (User Creation)
