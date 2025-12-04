@@ -122,6 +122,35 @@ class CatBuilder:
     def build(self):
         return self.cat
 
+# ==========================================
+# 4. STRATEGY PATTERN (Filtering Cats)
+# ==========================================
+class FilterStrategy(ABC):
+    @abstractmethod
+    def filter(self, cats, criteria):
+        pass
+
+class AgeFilter(FilterStrategy):
+    def filter(self, cats, age_limit):
+        # Assumes 'cats' is a list of Cat objects
+        return [cat for cat in cats if cat.age == age_limit]
+
+class StatusFilter(FilterStrategy):
+    def filter(self, cats, status):
+        return [cat for cat in cats if cat.status == status]
+
+class CatGallery:
+    def __init__(self, cats):
+        self.cats = cats
+        self.strategy = None
+
+    def set_strategy(self, strategy: FilterStrategy):
+        self.strategy = strategy
+
+    def get_filtered_cats(self, criteria):
+        if not self.strategy:
+            return self.cats
+        return self.strategy.filter(self.cats, criteria)
 
 # ==========================================
 # 5. OBSERVER PATTERN (Application Status)
@@ -173,3 +202,27 @@ class UserNotificationObserver(Observer):
                    f"Dear {self.username}, your adoption request was declined. Reason: {reason}")
 
 
+# ==========================================
+# 6. DECORATOR PATTERN (Route Protection)
+# ==========================================
+# A global dictionary to simulate a logged-in user session
+# You can modify this from app.py
+mock_session = {"user_role": None, "is_logged_in": False}
+
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not mock_session["is_logged_in"]:
+            return "<h1>Access Denied: You must be logged in.</h1>", 403
+        return f(*args, **kwargs)
+    return decorated_function
+
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        user_role = session.get("role")
+        # Check for both "Admin" (hardcoded) and "admin" (database)
+        if str(user_role).lower() != "admin":
+            return "<h1>Access Denied: Admin privileges required.</h1>", 403
+        return f(*args, **kwargs)
+    return decorated_function
