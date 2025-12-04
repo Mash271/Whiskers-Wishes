@@ -74,7 +74,7 @@ def home():
                            today=datetime.today().strftime("%A, %B %d, %Y"),
                            date=datetime.now(),
                            name=None)
-    
+    #..
 @app.route("/hello/")
 @app.route("/hello/<name>")
 def hello_there(name = None):

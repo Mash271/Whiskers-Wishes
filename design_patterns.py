@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from functools import wraps
 from dotenv import load_dotenv
 from flask import session
-
+import psycopg2
 # ==========================================
 # 1. SINGLETON PATTERN (Database Connection)
 # ==========================================
