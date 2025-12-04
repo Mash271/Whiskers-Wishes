@@ -113,7 +113,7 @@ def login():
     if request.method == "POST":
         username = request.form.get("username")
         password = request.form.get("password")
-
+        #...
         # Hardcoded Admin Backdoor
         if username == "Admin" and password == "67890":
             session["user_id"] = 0
@@ -151,6 +151,8 @@ def admin_dashboard():
 def admin_users():
     repo = AdminRepository()
     users = repo.get_all_users()
+    #print users
+
     return render_template("admin_users.html", users=users)
 
 @app.route("/admin/cats")
@@ -160,7 +162,7 @@ def admin_cats():
     repo = CatRepository(conn=db_conn)
     # We ideally want ALL cats, even adopted ones, but for now we use available
     cats = repo.get_available_cats()
-    
+        
     return render_template("admin_cats.html", cats=cats)
 
 @app.route("/admin/applications")
