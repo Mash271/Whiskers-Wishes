@@ -14,7 +14,7 @@ CHANGES MADE:
 import os
 from flask import Flask, render_template, request, redirect, session
 from werkzeug.security import generate_password_hash, check_password_hash
-from db_connection import get_db_connection
+from init_db import get_db_connection
 
 app = Flask(__name__)
 
