@@ -26,16 +26,14 @@ The goal of this project is to create a cat adoption service that is simple, eas
 ### TeckStack 
 ```
 framework: python flask
-database: mySQL
+database: neonDB
 frontend: html, css  
 ```
 
 ### Possible design patterns:
-   1. factory 
-   2. builder  
-   3. singleton 
-   4. observer 
+   1. factory -> user account creation
+   2. builder -> cat profile creation
+   3. singleton -> database connection
+   4. observer -> application status
    5. strategy
-   6. adapter 
-   7. facade
-   8. iterator
+   6. decorator -> route protection
