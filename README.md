@@ -13,6 +13,16 @@ The goal of this project is to create a cat adoption service that is simple, eas
 - Marium Uddin (2233480042)
 
 ## The Project:
+### Class Diagram
+<img width="250" height="420" alt="image" src="https://github.com/user-attachments/assets/0d5a40ad-d37a-473c-9af6-911ff50d2ddb" />
+
+### ERD
+<img width="550" height="320" alt="image" src="https://github.com/user-attachments/assets/44093334-3164-45ad-9504-85dd15789f3b" />
+
+### Use-Case Diagram
+<img width="525" height="640" alt="image" src="https://github.com/user-attachments/assets/496360aa-ba58-4be9-a26e-3c398b1c1b99" />
+
+
 ### TeckStack 
 ```
 framework: python flask
@@ -27,12 +37,3 @@ frontend: html, css
    4. observer -> application status
    5. strategy
    6. decorator -> route protection
-
-### Class Diagram
-<img width="250" height="420" alt="image" src="https://github.com/user-attachments/assets/0d5a40ad-d37a-473c-9af6-911ff50d2ddb" />
-
-### ERD
-<img width="550" height="320" alt="image" src="https://github.com/user-attachments/assets/44093334-3164-45ad-9504-85dd15789f3b" />
-
-### Use-Case Diagram
-<img width="525" height="640" alt="image" src="https://github.com/user-attachments/assets/496360aa-ba58-4be9-a26e-3c398b1c1b99" />
