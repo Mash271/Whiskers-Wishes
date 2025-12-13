@@ -8,26 +8,44 @@ import psycopg2
 # ==========================================
 # 1. SINGLETON PATTERN (Database Connection)
 # ==========================================
-import psycopg2 # Make sure to import this!
+
+import threading
 
 class DatabaseConnection:
     _instance = None
+    _lock = threading.Lock()  # 1. Thread Lock for safety
 
     def __new__(cls):
+        # 2. Double-Checked Locking Pattern
+        # This prevents multiple threads from creating separate instances at the same time
         if cls._instance is None:
-            cls._instance = super(DatabaseConnection, cls).__new__(cls)
-            print("[Singleton] Creating new DatabaseConnection instance.")
-            # Check if we are on Render by looking for the DATABASE_URL variable
-            db_url = os.environ.get("DATABASE_URL")
-
-            if db_url:
-                # We are on Render! Connect to Postgres
-                cls._instance.connection = psycopg2.connect(db_url)
-                print("[Singleton] Connected to Render PostgreSQL Database.")
-            else:
-                # We are local! Connect to SQLite
-                cls._instance.connection = sqlite3.connect('whiskers_wishes.db', check_same_thread=False)
-                print("[Singleton] Connected to Local SQLite Database.")
+            with cls._lock:
+                if cls._instance is None:
+                    print("[Singleton] Creating new DatabaseConnection instance.")
+                    
+                    # Create the object but DO NOT assign it to cls._instance yet
+                    temp_instance = super(DatabaseConnection, cls).__new__(cls)
+                    
+                    # 3. Connection Logic
+                    try:
+                        db_url = os.environ.get("DATABASE_URL")
+                        if db_url:
+                            # Render / PostgreSQL
+                            temp_instance.connection = psycopg2.connect(db_url)
+                            print("[Singleton] Connected to Render PostgreSQL Database.")
+                        else:
+                            # Local / SQLite
+                            temp_instance.connection = sqlite3.connect('whiskers_wishes.db', check_same_thread=False)
+                            print("[Singleton] Connected to Local SQLite Database.")
+                        
+                        # 4. Only assign the instance IF connection succeeded
+                        cls._instance = temp_instance
+                        
+                    except Exception as e:
+                        print(f"[Singleton] Error connecting to database: {e}")
+                        # If we fail, we return None or raise the error. 
+                        # cls._instance remains None, so we can try again next request.
+                        raise e
 
         return cls._instance
 
