@@ -32,8 +32,8 @@ frontend: html, css
 
 ### Possible design patterns:
    1. factory -> user account creation
-   2. builder -> cat profile creation
-   3. singleton -> database connection
+   2. builder -> cat profile creation ✅
+   3. singleton -> database connection ✅
    4. observer -> application status
-   5. strategy
-   6. decorator -> route protection
+   5. strategy -> filter gallery
+   6. proxy -> route protection
