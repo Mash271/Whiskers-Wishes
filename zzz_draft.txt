@@ -1,0 +1,115 @@
+Your implementation using `__new__` is actually the **standard and correct way** to implement the Singleton pattern in Python. Unlike Java or C++, Python doesn't support "private" constructors. Instead, we use `__new__` to intercept the creation process and ensure only one instance is ever returned.
+
+However, your current code has a **critical "Zombie Object" bug**: if the database connection fails (e.g., bad password or internet issue), your code has already set `_instance` to an object. The next time you call `DatabaseConnection()`, it will return that broken, unconnected object instead of trying to connect again.
+
+Here is the **fixed, robust version**. I have added **Thread Safety** (essential for Flask) and **Error Handling** to ensure we only save the instance if the connection actually succeeds.
+
+### Fixed `DatabaseConnection` (Put this in `design_patterns.py`)
+
+```python
+import sqlite3
+import os
+import psycopg2
+import threading
+
+class DatabaseConnection:
+    _instance = None
+    _lock = threading.Lock()  # 1. Thread Lock for safety
+
+    def __new__(cls):
+        # 2. Double-Checked Locking Pattern
+        # This prevents multiple threads from creating separate instances at the same time
+        if cls._instance is None:
+            with cls._lock:
+                if cls._instance is None:
+                    print("[Singleton] Creating new DatabaseConnection instance.")
+                    
+                    # Create the object but DO NOT assign it to cls._instance yet
+                    temp_instance = super(DatabaseConnection, cls).__new__(cls)
+                    
+                    # 3. Connection Logic
+                    try:
+                        db_url = os.environ.get("DATABASE_URL")
+                        if db_url:
+                            # Render / PostgreSQL
+                            temp_instance.connection = psycopg2.connect(db_url)
+                            print("[Singleton] Connected to Render PostgreSQL Database.")
+                        else:
+                            # Local / SQLite
+                            temp_instance.connection = sqlite3.connect('whiskers_wishes.db', check_same_thread=False)
+                            print("[Singleton] Connected to Local SQLite Database.")
+                        
+                        # 4. Only assign the instance IF connection succeeded
+                        cls._instance = temp_instance
+                        
+                    except Exception as e:
+                        print(f"[Singleton] Error connecting to database: {e}")
+                        # If we fail, we return None or raise the error. 
+                        # cls._instance remains None, so we can try again next request.
+                        raise e
+
+        return cls._instance
+
+    def get_connection(self):
+        return self.connection
+```
+
+### Key Improvements Explained:
+
+1.  **Why no "Private Constructor"?**
+    In Python, you cannot make `__init__` private. The `__new__` method is the gatekeeper. By checking `if cls._instance is None`, you guarantee that `super().__new__` (the actual creation) is called **only once**. Every subsequent call to `DatabaseConnection()` simply returns the existing `cls._instance`.
+2.  **Thread Safety (`_lock`):**
+    Flask is a web server, which can handle multiple requests at once. Without the lock, two users visiting your site at the exact same millisecond could potentially create two database connections. The `threading.Lock()` prevents this.
+3.  **The "Zombie" Fix:**
+    I used a `temp_instance` variable. I only assign `cls._instance = temp_instance` **after** the connection is successful. If `psycopg2.connect` fails, `cls._instance` stays `None`, so the app will try to connect again on the next request instead of being stuck with a broken object forever.
+
+### How to use it (No changes needed in your app code)
+
+Your existing usage in `app.py` is perfect and works with this fix:
+
+```python
+# This looks like a constructor, but __new__ makes it return the Singleton!
+db_conn = DatabaseConnection().get_connection() 
+```
+
+You are absolutely right to look for the "reset" (or **release**) mechanism. In low-level systems programming (like C/C++), if you acquire a mutex and forget to release it, you cause a **deadlock**—no other process can ever enter that critical section again.
+
+In Python, the `with` keyword is "syntactic sugar" that handles this safe-guarding for you automatically.
+
+### The "Invisible" Logic
+
+The code I wrote:
+
+```python
+with cls._lock:
+    if cls._instance is None:
+        # ... create instance ...
+```
+
+Is actually automatically translated by Python into this "manual" version, which matches the theory you learned:
+
+```python
+cls._lock.acquire()  # <--- LOCK (Enter Critical Section)
+try:
+    if cls._instance is None:
+        # ... create instance ...
+finally:
+    cls._lock.release()  # <--- UNLOCK/RESET (Exit Critical Section)
+```
+
+### Why we use `with`?
+
+The `with` statement (called a **Context Manager**) is safer because it puts the `.release()` inside a `finally` block.
+
+  * **Success:** If the code inside runs perfectly, the lock is released.
+  * **Failure:** If an error/exception crashes the code halfway through, the lock is **still released**.
+
+Without this, if your database connection crashed inside the lock, the lock would stay "closed" forever, and your entire web server would freeze waiting for it\!
+
+### Summary for your Mental Model
+
+  * **`cls._lock.acquire()`** happens when the code execution hits the `with` line.
+  * **`cls._lock.release()`** happens the instant the code block indentation ends (or if it crashes).
+
+So, the "reset" is there; it's just handled silently by Python to keep the code clean.
+
