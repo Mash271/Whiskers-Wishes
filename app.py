@@ -16,7 +16,9 @@ from design_patterns import (
 )
 
 # Load environment variables from .env file
-#load_dotenv()
+#this line was commented until now, maybe this is why the
+# database connection was failing?
+load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = "dont_tell_anyone_my_secret"
