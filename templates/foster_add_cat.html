@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Foster Cat</title>
+    <style>
+        /* This matches your Register page CSS exactly */
+        body { 
+            font-family: sans-serif; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            background-color: #f0f2f5; 
+            margin: 0;
+        }
+        .reg-box { 
+            background: white; 
+            padding: 40px; 
+            border-radius: 8px; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
+            width: 350px; 
+        }
+        /* I added 'textarea' here so the Bio box looks the same as inputs */
+        input, select, textarea { 
+            width: 100%; 
+            padding: 10px; 
+            margin: 10px 0; 
+            border: 1px solid #ddd; 
+            box-sizing: border-box; 
+            font-family: sans-serif; /* Ensures font matches inside inputs */
+        }
+        button { 
+            width: 100%; 
+            padding: 10px; 
+            background-color: #28a745; 
+            color: white; 
+            border: none; 
+            cursor: pointer; 
+            font-size: 16px;
+            border-radius: 4px;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        /* Simple styling for success/error messages inside this box */
+        .msg {
+            text-align: center;
+            font-size: 14px;
+            margin-bottom: 10px;
+            padding: 5px;
+            border-radius: 4px;
+        }
+        .msg-error { color: #721c24; background-color: #f8d7da; }
+        .msg-success { color: #155724; background-color: #d4edda; }
+    </style>
+</head>
+<body>
+    <div class="reg-box">
+        <h2 style="text-align: center; margin-top: 0;">Add Foster Cat</h2>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="msg msg-{{ category }}">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <form action="{{ url_for('foster_add_cat') }}" method="POST">
+            
+            <input type="text" name="name" placeholder="Cat Name" 
+                   value="{{ form_data.get('name') or '' }}" required>
+            
+            <input type="text" name="age" placeholder="Age (e.g. 2 Years)" 
+                   value="{{ form_data.get('age') or '' }}" required>
+            
+            <select name="breed" required>
+                <option value="" disabled {% if not form_data.get('breed') %}selected{% endif %}>Select Breed</option>
+                {% for breed in ["Domestic Shorthair", "Domestic Longhair", "Siamese", "Persian", "Maine Coon", "Ragdoll", "Bengal", "Sphynx", "British Shorthair", "Other/Mix"] %}
+                    <option value="{{ breed }}" {% if form_data.get('breed') == breed %}selected{% endif %}>{{ breed }}</option>
+                {% endfor %}
+            </select>
+            
+            <input type="text" name="image_url" placeholder="Photo URL (Optional)" 
+                   value="{{ form_data.get('image_url') or '' }}">
+            
+            <textarea name="bio" rows="3" placeholder="Story / Bio..." required>{{ form_data.get('bio') or '' }}</textarea>
+
+            <input type="hidden" name="status" value="Available">
+
+            <button type="submit">List Cat</button>
+        </form>
+        
+        <p style="text-align: center; margin-top: 15px;">
+            Changed your mind? <a href="{{ url_for('home') }}" style="color: #666; text-decoration: none;">Cancel</a>
+            <a href="/" class="back-btn">← Back to Home</a>
+        </p>
+    </div>
+</body>
+</html>

@@ -86,7 +86,46 @@ def hello_there(name = None):
         date=datetime.now()
     )
 
-# --- DEMONSTRATION OF DECORATOR PATTERN ---
+@app.route("/foster/add", methods=["GET", "POST"])
+def foster_add_cat():
+    # Security check: Ensure user is logged in
+    if not session.get("logged_in"):
+        return redirect(url_for("login"))
+    
+    # You might also want to check if session['role'] == 'foster' or 'admin'
+    if request.method == "POST":
+        form_data = request.form
+        
+        print("Form Data operation commencing:")
+          
+        repo = UserRepository()
+        user = repo.get_user_by_id()
+        user_id = user["user_id"]
+
+        
+        name = form_data.get("name")
+        age = form_data.get("age")
+        breed = form_data.get("breed")
+        bio = form_data.get("bio")
+        image_url = form_data.get("image_url")
+        status = form_data.get("status", "Available")
+
+        repo = CatRepository(db_conn)
+        new_cat_id = repo.create_cat(user_id, name, age,
+                                     breed, bio, image_url, status)
+
+        print(f"New Cat ID: {new_cat_id}")
+        if new_cat_id:
+            flash(f"Success! {name} has been added.", "success")
+            return redirect(url_for("gallery"))
+        else:
+            flash("Error adding cat. Please try again.", "error")
+            return render_template("foster_add_cat.html", form_data=form_data)
+
+    # For a normal GET request (first visit), form_data is None
+    return render_template("foster_add_cat.html", form_data={})
+
+
 @app.route("/admin")
 @admin_required
 def admin_panel():
@@ -256,7 +295,7 @@ def register():
             return render_template("register.html", error="Passwords do not match!")
 
         # 3. Save to Database
-        user_repo = UserRepository(db_conn)
+        user_repo = UserRepository()
 
         # Check if username ALREADY exists
         if user_repo.get_user_by_username(username):
