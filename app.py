@@ -256,7 +256,7 @@ def register():
             return render_template("register.html", error="Passwords do not match!")
 
         # 3. Save to Database
-        user_repo = UserRepository(db_conn)
+        user_repo = UserRepository()
 
         # Check if username ALREADY exists
         if user_repo.get_user_by_username(username):
