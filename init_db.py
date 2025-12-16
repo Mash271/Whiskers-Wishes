@@ -56,7 +56,6 @@ def init_db():
             name VARCHAR(50) NOT NULL,
             age INTEGER,
             breed VARCHAR(50),
-            image_url VARCHAR(255),
             bio TEXT,
             vaccination_status VARCHAR(50) DEFAULT 'Not Vaccinated',
             application_status VARCHAR(50) DEFAULT 'Available',

@@ -12,57 +12,6 @@ class CatRepository:
         #'self' is NEVER passed as a parameter
         self.conn = conn
 
-    # Updated signature to accept foster_id
-    def create_cat(self, user_id, name, age, breed, bio, image_url, status):
-        """Creates a new cat record linked to a specific foster user."""
-        self.conn = DatabaseConnection().get_connection()
-        
-        # --- Sanitize 'Age' Input ---
-        try:
-            import re
-            numbers = re.findall(r'\d+', str(age))
-            if numbers:
-                clean_age = int(numbers[0])
-            else:
-                clean_age = 0 
-        except Exception:
-            clean_age = 0
-
-        try:
-            cur = self.conn.cursor()
-            
-            print(f"🛠️ Attempting to insert: Name={name}, Age={clean_age}, FosterID={user_id}")
-
-            # --- FIXES APPLIED ---
-            # 1. Added 'foster_id' to the INSERT columns.
-            # 2. Added 'image_url' to the INSERT columns (it was missing before, causing the crash).
-            # 3. Ensured we have 7 placeholders (%s) for the 7 variables.
-            query = """
-                INSERT INTO cats (user_id, name, age, breed, image_url, bio, application_status)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
-                RETURNING cat_id;
-            """
-        
-            # Pass foster_id as the first argument to match the query order
-            cur.execute(query, (user_id, name, clean_age, breed, bio, image_url, status))
-            
-            self.conn.commit()
-            
-            result = cur.fetchone()
-            if result:
-                new_id = result[0]
-                cur.close()
-                return new_id
-            else:
-                print("❌ Insert successful but no ID returned.")
-                return None
-
-        except Exception as e:
-            print(f"❌ DATABASE ERROR in create_cat: {e}")
-            if self.conn:
-                self.conn.rollback()
-            return None
-
     def get_available_cats(self):
         print("entered get_all_cats in catrepository 1️⃣")
         """
@@ -198,7 +147,7 @@ class UserRepository:
                 self.conn.rollback()
             return None
         
-    def get_user_by_id(self):
+    def get_user_by_id(self, user_id):
         """Fetches a user record by user ID."""
         self.conn = DatabaseConnection().get_connection()
         try:

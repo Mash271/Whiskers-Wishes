@@ -194,7 +194,7 @@
         </li>
 
         {% if session.get('role') == 'foster' %}
-            <li><a href="{{url_for('foster_add_cat')}}">➕ Add a Cat</a></li>
+            <li><a href="#">➕ Add a Cat</a></li>
         {% elif session.get('role') == 'admin' %}
             <li><a href="{{ url_for('admin_panel') }}">Admin Panel</a></li>
         {% endif %}
